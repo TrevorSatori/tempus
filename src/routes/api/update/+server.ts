@@ -5,9 +5,8 @@ import type { RequestEvent, RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({request}) => {
 
-    const {date, totalTime} = await request.json();
-    
-    addRecord(date, totalTime);
+    const {date, selectedTag, totalTime} = await request.json();
+    addRecord(date, selectedTag, totalTime);
 
     return new Response();
 };
