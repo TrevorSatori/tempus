@@ -2,6 +2,7 @@
     // // import type { PageData } from './$types';
     // // export let data: PageData;
     import {getCurrentWeekDates} from '$lib/timeframes';
+    import * as d3 from "d3";
     
     // basic display data
     let sessions = 0;
@@ -15,37 +16,56 @@
 
 
     // d3 data
-    // import d3 from "d3";
 
-    // let hdata = [23,120, 55, 21];
+    function drawData(){
+        // Sample data
+        const data = [
+            { label: 'Category A', value: 30 },
+            { label: 'Category B', value: 50 },
+            { label: 'Category C', value: 20 },
+        ];
 
-    // function showVis(){
-    //     const svgWidth = 600;
-    //     const svgHeight = 500;
-    //     const origcolor = "#6D3A7E";
-    //     const barwidth = 20;
-    //     const leftgap = 5;
-    //     const innergap = 10;
-    //     const unitwidth = barwidth+innergap;
-    //     const hist = d3.select("#my_dataviz")
-    //                     .append("svg")
-    //                         .attr("width", svgWidth)
-    //                         .attr("height", svgHeight)
-    //                     hist.append("g")
-    //                         .attr("fill", origcolor)
-    //                         .attr("transform", `translate(${200}, ${200})`)
-    //                         .selectAll("rect")
-    //                         .data(hdata)
-    //                         .join("rect")
-    //                         .attr("x", (d,i) => i * unitwidth + leftgap)
-    //                         .attr("width", barwidth)
-    //                         .attr("y", 0)
-    //                         .attr("height", d => d)
+        // Set up dimensions
+        const width = 400;
+        const height = 400;
+        const radius = Math.min(width, height) / 2;
 
+        // Create an SVG element
+        const svg = d3.select("#chart")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2},${height / 2})`);
 
+        // Create an arc generator
+        const arc = d3.arc<d3.PieArcDatum<{ label: string; value: number }>>() // Use any for innerRadius and outerRadius
+            .innerRadius(radius * 0.5)
+            .outerRadius(radius * 0.8);
 
-    // }
-    // END d3 //
+        // Create a pie layout
+        const pie = d3.pie<{ label: string; value: number }>()
+            .value(d => d.value);
+
+        // Generate pie chart data
+        const pieData = pie(data);
+
+        // Create color scale
+        const color = d3.scaleOrdinal()
+            .domain(data.map(d => d.label))
+            .range(d3.schemeCategory10);
+
+        // Draw the donut chart
+        svg.selectAll("path")
+        .data(pieData)
+        .enter().append("path")
+        .attr("d", arc)
+        .each(function(d) {
+            const fillColor: any = color(d.data.label);
+            d3.select(this).attr("fill", fillColor);
+        })
+        .attr("stroke", "white")
+        .style("stroke-width", "2px");
+    }
 
 
     enum Analysis {
@@ -66,6 +86,7 @@
         sessions = Object.entries(res).length;
         selectedAnalysis = Analysis.Daily;
         setTotalTime();
+        drawData();
 	}
 
     async function getWeekly() {
@@ -161,7 +182,9 @@
 {/if}
 
 
-
+<div class="flex justify-center">
+    <svg id="chart"></svg>
+</div>
 
 {#if hours < 1}
     <h3> You've studied a total of {minutes} minutes over {sessions} sessions </h3>
