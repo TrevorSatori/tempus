@@ -3,41 +3,44 @@
 > Currently in active development, check back later.
 
 
-# create-svelte
+# Install
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+> To install this repo there are several options, 
 
-## Creating a project
+### Docker Install
 
-If you're seeing this, you've probably already done this step. Congrats!
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+### Build from source
 
-# create a new project in my-app
-npm create svelte@latest my-app
+
+1. Clone the repo
+```sh
+git clone https://github.com/TrevorSatori/tempus.git
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+2. change directory to the repo
+```sh
+cd tempus
 ```
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
+3. Install the dependencies
+```sh
+npm install
 ```
 
-You can preview the production build with `npm run preview`.
+4.build an optimized version of the project
+```sh
+npm npm run build
+```
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+5. run and enjoy 
+```sh
+npm npm run start
+```
+
+
+## Analytics
+
+
+
+## Customizable
