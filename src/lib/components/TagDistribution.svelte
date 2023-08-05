@@ -1,6 +1,25 @@
 <script lang="ts">
 
-    export let tagData;
+    export let tagData: any;
+    // export let tagTime: any;
+
+    // convert time to hours, minutes
+    function convertData(time: number){
+    
+      let mins = 0;
+      let hours = 0;
+      
+      // if less than 1 hour
+      if (time < 60 * 60){
+        mins = Math.round(time / 60);
+      } else{
+
+        hours = Math.floor(time / (60 * 60));
+        mins = Math.floor(time - (hours * 60));
+      }
+
+      return [mins, hours]
+    }
 
 </script>
 
@@ -17,13 +36,19 @@
                 <table class="table">
                   <tbody>
                     {#each tagData as item}
-                        <!-- <div class="badge badge-outline">{item.label} {item.value}%</div> -->
                         <tr>
-                            <td>{item.label}</td>
+                            <td >{item.label}</td>
                             <td>{item.value}%</td>
+                            <td>
+                              {#if convertData(item.time_focused)[1] === 0}
+                                {convertData(item.time_focused)[0]} M
+                              {:else}
+                                {convertData(item.time_focused)[1]} H {convertData(item.time_focused)[0]} M
+                              {/if}
+                            </td>
                             <!-- <td>Blue</td> -->
-                          </tr>
-                        <!-- <p>{item.label} | {item.value}</p> -->
+                        </tr>
+                        
                     {/each}
                   </tbody>
                 </table>

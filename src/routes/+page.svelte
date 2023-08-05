@@ -46,18 +46,18 @@
 
     function drawData(){
 
-        // get percenta
-        // const data = calculatePercentage();
-
         const percentageMap = calculatePercentage();
         
         const data = Array.from(percentageMap.entries()).map(([label, value]) => ({
             label: label,
-            value: value
+            value: value.percentage,
+            time_focused: value.time_focused 
         }));
+
 
         data.sort((a, b) => b.value - a.value);
         tagData = data;
+        console.log(data)
 
 
         // Set up dimensions
@@ -199,7 +199,6 @@
     function calculateTagDistribution(){
 
         const tagTimeMap = new Map();
-
         // Iterate through the array and update the map
         res.forEach((item: { time_focused: any; tag_id: any; }) => {
             const { time_focused, tag_id } = item;
@@ -223,8 +222,16 @@
 
         tagTimeMap.forEach((time_focused, tag_id) => {
             const percentage = Math.round((time_focused / totalSum) * 100);
-            percentageMap.set(tag_id, percentage);
+            // percentageMap.set(tag_id, percentage);
+            const entry = {
+                tag_id: tag_id,
+                percentage: percentage,
+                time_focused: time_focused
+            };
+            percentageMap.set(tag_id, entry);
+            
         });
+        // console.log(percentageMap);
         return percentageMap;
     }
 
