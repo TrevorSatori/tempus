@@ -1,11 +1,11 @@
 import { json } from '@sveltejs/kit';
-import { addTag, getTags } from '$lib/server/db';
+import { addTag, getAllTags } from '$lib/server/db';
 import type { RequestHandler } from './$types';
 
 
 export const GET: RequestHandler = async () => {
 
-    const allTags = getTags();
+    const allTags = getAllTags();
     return json(allTags);
 };
 

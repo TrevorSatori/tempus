@@ -38,7 +38,7 @@ export function getDaily(){
     endOfDay.setDate(endOfDay.getDate() + 1);
     endOfDay.setHours(0, 0, 0, 0);
 
-    const stmt = db.prepare("SELECT session, time_focused FROM focus WHERE session >= ? AND session <= ?");
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
     let entries = stmt.all(startOfDay.toISOString(), endOfDay.toISOString());
 
     return entries;
@@ -48,7 +48,7 @@ export function getDaily(){
 export function getWeekly(){
 
     const {monday, sunday} = getCurrentWeekDates();
-    const stmt = db.prepare("SELECT session, time_focused FROM focus WHERE session >= ? AND session <= ?");
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
     let entries = stmt.all(monday.toISOString(), sunday.toISOString());
 
     return entries;
@@ -58,7 +58,7 @@ export function getWeekly(){
 export function getMonthly(){
 
     const { firstDate, lastDate } = getFirstAndLastDateOfCurrentMonth();
-    const stmt = db.prepare("SELECT session, time_focused FROM focus WHERE session >= ? AND session <= ?");
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
     let entries = stmt.all(firstDate.toISOString(), lastDate.toISOString());
     return entries;
 }
@@ -68,7 +68,7 @@ export function getMonthly(){
 export function getYearly(){
 
     const {firstDate, lastDate} = getFirstAndLastDateOfYear();
-    const stmt = db.prepare("SELECT session, time_focused FROM focus WHERE session >= ? AND session <= ?");
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
     let entries = stmt.all(firstDate.toISOString(), lastDate.toISOString());
 
     return entries;
@@ -81,21 +81,11 @@ export function addTag(name: string){
     stmt.run(name);
 }
 
-export function getTags(){
+
+// returns all tags in database
+export function getAllTags(){
     const stmt = db.prepare("SELECT name from tags");
     let tags = stmt.all();
 
     return tags;
 }
-
-
-// for each 
-export function timeDistribution(tag_id: string){
-    
-    const stmt = db.prepare("SELECT SUM(time_focused) FROM focus WHERE tag_id = ?;");
-    let x = stmt.all(tag_id);
-    return x;
-}
-
-// SELECT DISTINCT tag_id FROM focus
-

@@ -17,8 +17,6 @@
     $: minutes = 0;
     $: seconds = 0;
     
-    
-
 
     // Analytics merge 
     // basic display data
@@ -30,18 +28,28 @@
     let endTimeFrame: string;
     let selectedAnalysis: Analysis;
     let res: any;
-
+    
+    enum Analysis {
+        Daily,
+        Weekly,
+        Monthly,
+        Yearly,
+    }
 
     // d3 data
 
     function drawData(){
 
-        // Sample data
-        const data = [
-            { label: 'Category A', value: 30 },
-            { label: 'Category B', value: 50 },
-            { label: 'Category C', value: 20 },
-        ];
+        // get percenta
+        // const data = calculatePercentage();
+
+        const percentageMap = calculatePercentage();
+        console.log(calculatePercentage())
+
+        const data = Array.from(percentageMap.entries()).map(([label, value]) => ({
+            label: label,
+            value: value
+        }));
 
         // Set up dimensions
         const width = 400;
@@ -66,7 +74,6 @@
 
         // Generate pie chart data
         const pieData = pie(data);
-
         // Create color scale
         const color = d3.scaleOrdinal()
             .domain(data.map(d => d.label))
@@ -85,14 +92,6 @@
         .style("stroke-width", "2px");
     }
 
-
-    enum Analysis {
-        Daily,
-        Weekly,
-        Monthly,
-        Yearly,
-    }
-
     async function getDaily() {
 		
         //get results from database
@@ -104,6 +103,7 @@
         sessions = Object.entries(res).length;
         selectedAnalysis = Analysis.Daily;
         setTotalTime();
+        calculateTagDistribution();
         drawData();
 	}
 
@@ -186,17 +186,40 @@
 
     // timeDistribution();
 
-    // calculate tag distribution
-    async function calculateTagDistribution(){
-        
-        const res = await fetch(`/api/tags`);
-        // look at all data
-        tags.forEach((element) => {
-            console.log(element);            
+    // calculate tag distribution (Takes in enum)
+    function calculateTagDistribution(){
+
+        const tagTimeMap = new Map();
+
+        // Iterate through the array and update the map
+        res.forEach((item: { time_focused: any; tag_id: any; }) => {
+            const { time_focused, tag_id } = item;
+            if (tagTimeMap.has(tag_id)) {
+                tagTimeMap.set(tag_id, tagTimeMap.get(tag_id) + time_focused);
+            } else {
+                tagTimeMap.set(tag_id, time_focused);
+            }
         });
-        
-        
+
+        return tagTimeMap;
+
+    
     }
+
+    function calculatePercentage() {
+
+        const tagTimeMap = calculateTagDistribution();
+        const totalSum = Array.from(tagTimeMap.values()).reduce((sum, value) => sum + value, 0);
+        const percentageMap = new Map();
+
+        tagTimeMap.forEach((time_focused, tag_id) => {
+            const percentage = Math.round((time_focused / totalSum) * 100);
+            percentageMap.set(tag_id, percentage);
+        });
+        return percentageMap;
+    }
+
+
 
     async function getTags(){
         const res = await fetch(`/api/tags`);
@@ -303,25 +326,23 @@
           
         </div>
         <div class="flex justify-end">
-            <div class="flex justify-center">
+            <!-- svelte-ignore a11y-missing-attribute -->
+            <div class="dropdown dropdown-end">
+                <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                <!-- svelte-ignore a11y-label-has-associated-control -->
+                <label tabindex="0" class="btn btn-ghost rounded-btn m-1">Tags</label>
+                <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
+                <!-- For each loop rendering all tags from database -->
+                {#each tags as tag}
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <div class="dropdown dropdown-end">
-                  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-                  <!-- svelte-ignore a11y-label-has-associated-control -->
-                  <label tabindex="0" class="btn btn-ghost rounded-btn">Tags</label>
-                  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-                  <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
-                    <!-- For each loop rendering all tags from database -->
-                    {#each tags as tag}
-                    <!-- svelte-ignore a11y-missing-attribute -->
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <!-- svelte-ignore a11y-no-static-element-interactions -->
-                        <li><a on:click={() => selectedTag = tag.name}>{tag.name}</a></li> 
-                    {/each}
-                    <button class="btn btn-primary flex items-center space-x-2" on:click={() => addTag = true}>add tag</button> 
-                  </ul>
-                </div>
-              </div>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <!-- svelte-ignore a11y-no-static-element-interactions -->
+                    <li><a on:click={() => selectedTag = tag.name}>{tag.name}</a></li> 
+                {/each}
+                <button class="btn btn-primary flex items-center space-x-2" on:click={() => addTag = true}>add tag</button> 
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -391,23 +412,27 @@
         </div>
     </div>
 
-    <!-- Data visualizations -->
-    <div class="grid grid-cols-2 gap-4 mx-auto">
-        <div>
-            <svg id="chart"></svg>
-        </div>
-        
-    </div>
 
-    <div class="grid grid-cols-1">
-        <div class="bg-gray-200 bg-opacity-0 p-4"></div>
-        <div class="bg-gray-200 bg-opacity-0 p-4"></div>
-        {#if hoursAnalytics < 1}
-            <h3> You've studied a total of {minutesAnalytics} minutes over {sessions} sessions </h3>
-        {:else}
-            <h3> You've studied a total of {hoursAnalytics} hours {minutesAnalytics} minutes over {sessions} sessions </h3>
-        {/if}
-    </div>
+    {#if !isFocused}
+        <!-- Data visualizations -->
+        <div class="grid grid-cols-1 mx-auto">
+            <div class="mx-auto">
+                <svg id="chart"></svg>
+            </div>
+            <div class="bg-purple-200"></div>
+            
+        </div>
+
+        <div class="grid grid-cols-1">
+            <div class="bg-gray-200 bg-opacity-0 p-4"></div>
+            <div class="bg-gray-200 bg-opacity-0 p-4"></div>
+            {#if hoursAnalytics < 1 && (selectedAnalysis !== undefined)}
+                <h3> You've studied a total of {minutesAnalytics} minutes over {sessions} sessions </h3>
+            {:else if (selectedAnalysis !== undefined)}
+                <h3> You've studied a total of {hoursAnalytics} hours {minutesAnalytics} minutes over {sessions} sessions </h3>
+            {/if}
+        </div>
+    {/if}
 
 </body>
 
