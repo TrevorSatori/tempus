@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:lts-slim
 
 WORKDIR /app
 
@@ -8,9 +8,9 @@ RUN npm install
 
 COPY . .
 
-ENV PORT 7777
+ENV PORT=9111
 
-EXPOSE $PORT
+EXPOSE 9111
 
 RUN npm run build
 
