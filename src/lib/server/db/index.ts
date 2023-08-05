@@ -87,3 +87,15 @@ export function getTags(){
 
     return tags;
 }
+
+
+// for each 
+export function timeDistribution(tag_id: string){
+    
+    const stmt = db.prepare("SELECT SUM(time_focused) FROM focus WHERE tag_id = ?;");
+    let x = stmt.all(tag_id);
+    return x;
+}
+
+// SELECT DISTINCT tag_id FROM focus
+

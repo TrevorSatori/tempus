@@ -1,4 +1,4 @@
-import { createDB } from '$lib/server/db';
+import { createDB, timeDistribution } from '$lib/server/db';
 import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
