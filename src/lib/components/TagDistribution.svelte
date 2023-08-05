@@ -15,7 +15,7 @@
       } else{
 
         hours = Math.floor(time / (60 * 60));
-        mins = Math.floor(time - (hours * 60));
+        mins = Math.floor(time / 60) - (hours * 60);
       }
 
       return [mins, hours]
