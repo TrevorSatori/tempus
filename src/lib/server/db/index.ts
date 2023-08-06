@@ -6,11 +6,11 @@ import { getRollingSevenDayPeriod, getFirstAndLastDateOfCurrentMonth, getFirstAn
 // if database file doesn't exist, creates it. Else connection is made.
 let db: any;
 
-// if Database has not been created, create one.
+// if Database has not been created, create one. For debug  { verbose: console.log }
 export function createDB(){
 
     if (!fs.existsSync(DB_PATH)){
-        db = new Database(DB_PATH, { verbose: console.log });
+        db = new Database(DB_PATH,);
         const base_partition = db.prepare("Create TABLE focus (id INTEGER PRIMARY KEY, session datetime default current_timestamp, tag_id TEXT, time_focused INTEGER);");
         const tagsTable = db.prepare("Create TABLE tags (id INTEGER PRIMARY KEY, name TEXT UNIQUE);");
         base_partition.run();
@@ -18,7 +18,7 @@ export function createDB(){
         addTag("Work");
         addTag("Study");
     } else {
-        db = new Database(DB_PATH, { verbose: console.log });
+        db = new Database(DB_PATH);
     }
 }
 

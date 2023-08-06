@@ -1,5 +1,4 @@
 <script lang="ts">
-    
 
     import { onMount } from "svelte";
     import {getRollingSevenDayPeriod} from '$lib/timeframes';
@@ -17,13 +16,12 @@
     let selectedTag = "Work";
     let tags: Array<any> = [];
 
-    $: hours = 0;
-    $: minutes = 0;
-    $: seconds = 0;
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
     
 
     // Analytics merge 
-
     enum Analysis {
         Daily,
         Weekly,
@@ -41,14 +39,14 @@
     let res: any;
     let tagData: any = [];
 
-    // $: {
-    //     if (selectedAnalysis !== undefined) {
-    //         drawData();
-    //     }
-    // }
-    
+    let wannaSee = false;
 
     // d3 data
+    onMount(() => {
+        themeChange(false);
+        getTags();
+        fetchData(Analysis.Daily);
+    });
 
     function drawData(){
 
@@ -63,8 +61,6 @@
 
         data.sort((a, b) => b.value - a.value);
         tagData = data;
-        console.log(data)
-
 
         // Set up dimensions
         const width = 400;
@@ -111,7 +107,6 @@
 
     // fetch data from database, set selectedAnalysis
     async function fetchData(analysis: Analysis){
-
 
         let analysisString: string = Analysis[analysis].toLocaleLowerCase();
         const response = await fetch(`/api/${analysisString}`);
@@ -162,12 +157,6 @@
 
     }
 
-    onMount(() => {
-        themeChange(false);
-        getTags();
-    });
-
-
     // calculate tag distribution (Takes in enum)
     function calculateTagDistribution(){
 
@@ -204,7 +193,6 @@
             percentageMap.set(tag_id, entry);
             
         });
-        // console.log(percentageMap);
         return percentageMap;
     }
 
@@ -295,6 +283,7 @@
         getTags();
     }
 
+
 </script>
 
 <body class="min-h-screen">
@@ -307,10 +296,10 @@
         </div> 
         <div class="flex justify-center flex-1 px-2">
             <div class="join">
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Day" on:click={() => fetchData(Analysis.Daily)} />
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Week" on:click={() => fetchData(Analysis.Weekly)} />
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Month" on:click={() => fetchData(Analysis.Monthly)} />
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Year" on:click={() => fetchData(Analysis.Yearly)} />
+                <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Daily); wannaSee = true;}}>Day</button>
+                <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Weekly); wannaSee = true;}}>Week</button>
+                <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Monthly); wannaSee = true;}}>Month</button>
+                <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Yearly); wannaSee = true;}}>Year</button>
             </div>
           
         </div>
@@ -334,6 +323,8 @@
             </div>
         </div>
     </div>
+
+    <div id="visualization"></div>
 
     <!-- Render addTag if button pressed -->
     {#if (addTag == true)}
@@ -375,7 +366,7 @@
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
             {:else}
-                <button class="btn btn-error btn-lg mt-4 mb-2 " on:click={stopFocus}>Stop</button> <!-- Decreased the bottom margin -->
+                <button class="btn btn-error btn-lg mt-4 mb-2 " on:click={() => {stopFocus(); wannaSee = false;}}>Stop</button> <!-- Decreased the bottom margin -->
             {/if}
         </div>
     </div>
@@ -383,33 +374,27 @@
    
     
     <!-- Begin analytics -->
-    {#if !isFocused}
+    {#if !isFocused && wannaSee}
         <div class="grid grid-cols-1">
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <!-- Timeline -->
-            <div>
-
-
-                {#if selectedAnalysis !== undefined}
-                    {#if selectedAnalysis === Analysis.Daily}
-                        <h2 class="text-primary text-lg font-mono">{new Date().toISOString().split('T')[0]}</h2>
-                    {:else if selectedAnalysis === Analysis.Weekly}
-                        <h2 class="text-primary text-lg font-mono">{startTimeFrame} - {endTimeFrame}</h2>
-                    {:else if selectedAnalysis === Analysis.Monthly}
-                        <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
-                    {:else if selectedAnalysis === Analysis.Yearly}
-                        <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
-                    {/if}
-                    <TagDistribution tagData={tagData} />
+            <div> 
+                {#if selectedAnalysis === Analysis.Daily}
+                    <h2 class="text-primary text-lg font-mono">{new Date().toISOString().split('T')[0]}</h2>
+                {:else if selectedAnalysis === Analysis.Weekly}
+                    <h2 class="text-primary text-lg font-mono">{startTimeFrame} - {endTimeFrame}</h2>
+                {:else if selectedAnalysis === Analysis.Monthly}
+                    <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
+                {:else if selectedAnalysis === Analysis.Yearly}
+                    <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
                 {/if}
+                <TagDistribution tagData={tagData} />
             </div>
         </div>
 
         <!-- Data visualizations -->
-        
-
         <div class="grid grid-cols-1">
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
@@ -420,6 +405,7 @@
             {/if}
         </div>
     {/if}
+
     
 
 </body>
