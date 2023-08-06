@@ -64,12 +64,12 @@ npm install
 
 4.build an optimized version of the project
 ```sh
-npm npm run build
+npm run build
 ```
 
 5. run and enjoy 
 ```sh
-npm npm run start
+npm run start
 ```
 
 
