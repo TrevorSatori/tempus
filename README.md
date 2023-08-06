@@ -1,6 +1,6 @@
 # Tempus: Self Hostable Productivity Manager
 
-![](readmeAssests/HomeScreen.png)
+![](readmeAssests/homeScreen.png)
 
 Wowoweewah, what is this? Download and make life great success!
 
