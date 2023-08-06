@@ -1,12 +1,12 @@
-# Tempus
+# Tempus: Self Hostable Productivity Manager
 
-Tempus is a self hostable productivity manager. Download and make life great success!
+![](static/borat.png)
 
-![]('static/borat.png')
+Wowoweewah, what is this? Download and make life great success!
 
 # Install
 
-> To install this repo there are several options, 
+> There are several options to install this repo.
 
 ### Docker Install
 
@@ -75,7 +75,7 @@ npm npm run start
 
 ## Analytics
 
-![]('readmeAssests/analytics.png')
+![](readmeAssests/analytics.png)
 
 
 ## Customizable
