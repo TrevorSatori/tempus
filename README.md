@@ -10,6 +10,39 @@
 ### Docker Install
 
 
+1. Get the latest docker image
+
+```sh
+docker pull satoridigital/tempus:latest
+```
+
+2. Configure a docker-compose file
+
+```yaml
+
+version: '3'
+services:
+  app:
+    image: satoridigital/tempus:latest
+    ports: 
+      - '9111:9111'
+    volumes:
+      - './data:/data'
+    restart: unless-stopped
+```
+
+3. run and enjoy
+
+```sh
+docker-compose up
+```
+
+alternatively if you want to run on homeserver in daemon mode
+
+```sh
+docker compose up -d
+```
+
 ### Build from source
 
 
@@ -41,6 +74,9 @@ npm npm run start
 
 ## Analytics
 
+![analytics]('readmeAssests/analytics.png')
 
 
 ## Customizable
+
+![](readmeAssests/custom.gif)

@@ -1,9 +1,9 @@
 version: '3'
 services:
-  web: 
-    build: .
-    network_mode: "host"
+  app:
+    image: satoridigital/tempus:latest
     ports: 
       - '9111:9111'
     volumes:
       - './data:/data'
+    restart: unless-stopped
