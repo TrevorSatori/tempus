@@ -401,7 +401,7 @@
             {#if hoursAnalytics < 1}
                 <h3> You've studied a total of {minutesAnalytics} minutes over {sessions} sessions </h3>
             {:else}
-                <h3> You've studied a total of {hoursAnalytics} hours {minutesAnalytics} minutes over {sessions} sessions </h3>
+                <h3> You've studied a total of {hoursAnalytics} hours {minutesAnalytics - (hoursAnalytics * 60)} minutes over {sessions} sessions </h3>
             {/if}
         </div>
     {/if}
