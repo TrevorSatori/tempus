@@ -1,0 +1,11 @@
+1. Ensure that graph is pulled up on first click
+
+2. Deselect {day, Week, Month, year} on focus start (isFocused)
+
+3. de-Render Data on focus, so on stop won't reappear, (MAYBE)
+
+4. Distribution Breakdown by hour.
+
+5. check sql query for week
+
+6. Refactor 

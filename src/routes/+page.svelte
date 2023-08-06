@@ -2,11 +2,10 @@
     
 
     import { onMount } from "svelte";
-    import {getCurrentWeekDates} from '$lib/timeframes';
+    import {getRollingSevenDayPeriod} from '$lib/timeframes';
     import * as d3 from "d3";
     import TagDistribution from "$lib/components/TagDistribution.svelte";
     import ThemeSelector from "$lib/components/ThemeSelector.svelte";
-    ///
     import { themeChange } from 'theme-change';
     
     let isFocused = false;
@@ -24,6 +23,13 @@
     
 
     // Analytics merge 
+
+    enum Analysis {
+        Daily,
+        Weekly,
+        Monthly,
+        Yearly,
+    }
     // basic display data
     let sessions = 0;
     let totalTimeAnalytics = 0;
@@ -33,14 +39,14 @@
     let endTimeFrame: string;
     let selectedAnalysis: Analysis;
     let res: any;
-    let tagData: any;
+    let tagData: any = [];
+
+    // $: {
+    //     if (selectedAnalysis !== undefined) {
+    //         drawData();
+    //     }
+    // }
     
-    enum Analysis {
-        Daily,
-        Weekly,
-        Monthly,
-        Yearly,
-    }
 
     // d3 data
 
@@ -102,75 +108,42 @@
 
     }
 
-    async function getDaily() {
-		
-        //get results from database
-        const response = await fetch('/api/daily');
+
+    // fetch data from database, set selectedAnalysis
+    async function fetchData(analysis: Analysis){
+
+
+        let analysisString: string = Analysis[analysis].toLocaleLowerCase();
+        const response = await fetch(`/api/${analysisString}`);
 		res = await response.json();
-        
+
         // assign total sessions to variable, set analysis to daily, 
         // setTotalTime to variable
+        selectedAnalysis = analysis;
         sessions = Object.entries(res).length;
-        selectedAnalysis = Analysis.Daily;
+        renderDates(analysis);
         setTotalTime();
         drawData();
-	}
+    }
 
-    async function getWeekly() {
-		
-        //get results from database
-        const response = await fetch('/api/weekly');
-		res = await response.json();
-        
-        // assign total sessions to variable
-        sessions = Object.entries(res).length;
-        selectedAnalysis = Analysis.Weekly;
-        
-        // sets total time studied to variable
-        setTotalTime();
-        drawData();
-        
-        const {monday, sunday} = getCurrentWeekDates();
-        startTimeFrame = monday.toISOString().split('T')[0];
-        endTimeFrame = sunday.toISOString().split('T')[0];
-        
-	}
+    function renderDates(analysis: Analysis){
+        if (analysis === Analysis.Weekly){
+            const {sevenDaysAgo, today} = getRollingSevenDayPeriod();
+            startTimeFrame = sevenDaysAgo.toISOString().split('T')[0];
+            endTimeFrame = today.toISOString().split('T')[0];
+        } else if(analysis === Analysis.Monthly){
+            // Get Monthly format, Format options for month abbreviation and year
+            const currentDate = new Date();
+            const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short' };
+            const formattedDate = currentDate.toLocaleString('en-US', options);
+            endTimeFrame = formattedDate;
+        } else if (analysis === Analysis.Yearly){
+            const currentDate = new Date();
+            const year = currentDate.getFullYear().toString();
+            endTimeFrame = year;
+        }
+    }
 
-    async function getMonthly() {
-		
-        //get results from database
-        const response = await fetch('/api/monthly');
-		res = await response.json();
-        
-        // assign total sessions to variable
-        sessions = Object.entries(res).length;
-        selectedAnalysis = Analysis.Monthly;
-        setTotalTime();
-        drawData();
-
-        // Get Monthly format, Format options for month abbreviation and year
-        const currentDate = new Date();
-        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short' };
-        const formattedDate = currentDate.toLocaleString('en-US', options);
-        endTimeFrame = formattedDate;
-	}
-
-    async function getYearly() {
-		
-        //get results from database
-        const response = await fetch('/api/yearly');
-		res = await response.json();
-        
-        // assign total sessions to variable
-        sessions = Object.entries(res).length;
-        selectedAnalysis = Analysis.Yearly;
-        setTotalTime();
-        drawData();
-
-        const currentDate = new Date();
-        const year = currentDate.getFullYear().toString();
-        endTimeFrame = year;
-	}
 
     // Calculate total time studied
     function setTotalTime(){
@@ -334,10 +307,10 @@
         </div> 
         <div class="flex justify-center flex-1 px-2">
             <div class="join">
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Day" on:click={getDaily} />
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Week" on:click={getWeekly} />
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Month" on:click={getMonthly} />
-                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Year" on:click={getYearly} />
+                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Day" on:click={() => fetchData(Analysis.Daily)} />
+                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Week" on:click={() => fetchData(Analysis.Weekly)} />
+                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Month" on:click={() => fetchData(Analysis.Monthly)} />
+                <input class="join-item btn btn-ghost rounded-btn" type="radio" name="options" aria-label="Year" on:click={() => fetchData(Analysis.Yearly)} />
             </div>
           
         </div>
@@ -361,7 +334,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Render addTag if button pressed -->
     {#if (addTag == true)}
@@ -407,29 +379,36 @@
             {/if}
         </div>
     </div>
+
+   
     
     <!-- Begin analytics -->
-    {#if !isFocused && (selectedAnalysis !== undefined)}
+    {#if !isFocused}
         <div class="grid grid-cols-1">
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <!-- Timeline -->
             <div>
-                {#if selectedAnalysis === Analysis.Daily}
-                    <h2 class="text-primary text-lg font-mono">{new Date().toISOString().split('T')[0]}</h2>
-                {:else if selectedAnalysis === Analysis.Weekly}
-                    <h2 class="text-primary text-lg font-mono">{startTimeFrame} - {endTimeFrame}</h2>
-                {:else if selectedAnalysis === Analysis.Monthly}
-                    <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
-                {:else if selectedAnalysis === Analysis.Yearly}
-                    <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
+
+
+                {#if selectedAnalysis !== undefined}
+                    {#if selectedAnalysis === Analysis.Daily}
+                        <h2 class="text-primary text-lg font-mono">{new Date().toISOString().split('T')[0]}</h2>
+                    {:else if selectedAnalysis === Analysis.Weekly}
+                        <h2 class="text-primary text-lg font-mono">{startTimeFrame} - {endTimeFrame}</h2>
+                    {:else if selectedAnalysis === Analysis.Monthly}
+                        <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
+                    {:else if selectedAnalysis === Analysis.Yearly}
+                        <h2 class="text-primary text-lg font-mono">{endTimeFrame}</h2>
+                    {/if}
+                    <TagDistribution tagData={tagData} />
                 {/if}
             </div>
         </div>
 
         <!-- Data visualizations -->
-        <TagDistribution tagData={tagData} />
+        
 
         <div class="grid grid-cols-1">
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
@@ -441,8 +420,6 @@
             {/if}
         </div>
     {/if}
-    
-    
     
 
 </body>

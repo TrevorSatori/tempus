@@ -1,21 +1,12 @@
-
-export function getCurrentWeekDates(): { monday: Date; sunday: Date } {
-    const currentDate = new Date();
-    const currentDayOfWeek = currentDate.getDay(); // 0 (Sunday) to 6 (Saturday)
+export function getRollingSevenDayPeriod() {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 5);
+    today.setHours(23, 59, 59, 999);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    
   
-    // Calculate days to Monday (1) and Sunday (7)
-    const daysToMonday = 1 - currentDayOfWeek;
-    const daysToSunday = 7 - currentDayOfWeek;
-  
-    // Create the Monday and Sunday dates
-    const monday = new Date(currentDate);
-    monday.setDate(currentDate.getDate() + daysToMonday);
-    monday.setHours(0, 0, 0, 0);
-  
-    const sunday = new Date(currentDate);
-    sunday.setDate(currentDate.getDate() + daysToSunday + 1);
-    sunday.setHours(0, 0, 0, 0);
-    return { monday, sunday };
+    return {sevenDaysAgo, today};
 }
 
 export function getFirstAndLastDateOfCurrentMonth(): { firstDate: Date; lastDate: Date } {

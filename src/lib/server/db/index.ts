@@ -1,7 +1,7 @@
 import { DB_PATH } from '$env/static/private';
 import Database from 'better-sqlite3';
 import * as fs from 'fs';
-import { getCurrentWeekDates, getFirstAndLastDateOfCurrentMonth, getFirstAndLastDateOfYear } from '$lib/timeframes';
+import { getRollingSevenDayPeriod, getFirstAndLastDateOfCurrentMonth, getFirstAndLastDateOfYear } from '$lib/timeframes';
 
 // if database file doesn't exist, creates it. Else connection is made.
 let db: any;
@@ -18,7 +18,7 @@ export function createDB(){
         addTag("Work");
         addTag("Study");
     } else {
-        db = new Database(DB_PATH);
+        db = new Database(DB_PATH, { verbose: console.log });
     }
 }
 
@@ -47,9 +47,9 @@ export function getDaily(){
   
 export function getWeekly(){
 
-    const {monday, sunday} = getCurrentWeekDates();
+    const {sevenDaysAgo, today} = getRollingSevenDayPeriod();
     const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
-    let entries = stmt.all(monday.toISOString(), sunday.toISOString());
+    let entries = stmt.all(sevenDaysAgo.toISOString(), today.toISOString());
 
     return entries;
 }

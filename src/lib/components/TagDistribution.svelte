@@ -46,9 +46,7 @@
                                 {convertData(item.time_focused)[1]} H {convertData(item.time_focused)[0]} M
                               {/if}
                             </td>
-                            <!-- <td>Blue</td> -->
                         </tr>
-                        
                     {/each}
                   </tbody>
                 </table>
