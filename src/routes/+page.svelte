@@ -6,8 +6,8 @@
     import TagDistribution from "$lib/components/TagDistribution.svelte";
     import ThemeSelector from "$lib/components/ThemeSelector.svelte";
     import { themeChange } from 'theme-change';
-    import TagInput from "$lib/components/TagInput.svelte";
     import { addTagStore } from "$lib/stores/store";
+    import CreateTag from "$lib/components/CreateTag.svelte";
 
     enum Analysis {
         Daily,
@@ -126,8 +126,8 @@
     function renderDates(analysis: Analysis){
         if (analysis === Analysis.Weekly){
             const {sevenDaysAgo, today} = getRollingSevenDayPeriod();
-            startTimeFrame = sevenDaysAgo.toISOString().split('T')[0];
-            endTimeFrame = today.toISOString().split('T')[0];
+            startTimeFrame = sevenDaysAgo;
+            endTimeFrame = today;
         } else if(analysis === Analysis.Monthly){
             // Get Monthly format, Format options for month abbreviation and year
             const currentDate = new Date();
@@ -263,14 +263,6 @@
 		})
 	}
 
-    function isValidInput(){
-        const regex = /^[A-Za-zsetTotalTime(); ]{2,21}$/;
-        return regex.test(newTag);
-    }
-
-
-
-
 </script>
 
 <body class="min-h-screen">
@@ -315,7 +307,7 @@
     
     <!-- Render addTag if button pressed -->
     {#if ($addTagStore === true)}
-        <TagInput getTags={getTags} />
+        <CreateTag getTags={getTags} />
     {/if}
 
 
@@ -350,9 +342,6 @@
         </div>
     </div>
     
-
-   
-    
     <!-- Begin analytics -->
     {#if !isFocused && wannaSee}
         <div class="grid grid-cols-1">
@@ -385,9 +374,6 @@
             {/if}
         </div>
     {/if}
-
-    
-
 </body>
 <footer>
     <footer class="footer items-center p-4 bg-neutral text-neutral-content">

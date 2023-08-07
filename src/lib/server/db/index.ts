@@ -31,15 +31,10 @@ export function addRecord(session: Date, tag_id: string, time_focused: number){
 
 
 export function getDaily(){
-    // get start and end of day
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setDate(endOfDay.getDate() + 1);
-    endOfDay.setHours(0, 0, 0, 0);
 
-    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
-    let entries = stmt.all(startOfDay.toISOString(), endOfDay.toISOString());
+    const startOfDay = new Date().toISOString().split('T')[0]
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) = ?");
+    let entries = stmt.all(startOfDay);
 
     return entries;
 }
@@ -48,8 +43,8 @@ export function getDaily(){
 export function getWeekly(){
 
     const {sevenDaysAgo, today} = getRollingSevenDayPeriod();
-    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
-    let entries = stmt.all(sevenDaysAgo.toISOString(), today.toISOString());
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) <= ?");
+    let entries = stmt.all(sevenDaysAgo, today);
 
     return entries;
 }
@@ -58,8 +53,8 @@ export function getWeekly(){
 export function getMonthly(){
 
     const { firstDate, lastDate } = getFirstAndLastDateOfCurrentMonth();
-    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
-    let entries = stmt.all(firstDate.toISOString(), lastDate.toISOString());
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) < ?");
+    let entries = stmt.all(firstDate, lastDate);
     return entries;
 }
 
@@ -68,8 +63,8 @@ export function getMonthly(){
 export function getYearly(){
 
     const {firstDate, lastDate} = getFirstAndLastDateOfYear();
-    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE session >= ? AND session <= ?");
-    let entries = stmt.all(firstDate.toISOString(), lastDate.toISOString());
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) <= ?");
+    let entries = stmt.all(firstDate, lastDate);
 
     return entries;
 }

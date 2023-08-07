@@ -1,14 +1,9 @@
 <script lang="ts">
-    
-    import { writable } from "svelte/store";
     import { addTagStore } from "$lib/stores/store";
 
     export let getTags:() => Promise<void>;
     let newTag = "";
     let isValidTagInput = false;
-    
-
-
 
     function checkValidity() {
         const regex = /^[A-Za-z ]{2,21}$/;
@@ -28,7 +23,6 @@
 
         getTags();
     }
-
 
 </script>
 
