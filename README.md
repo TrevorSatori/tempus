@@ -55,7 +55,7 @@ Discover seamless ways to install and unleash the potential of our productivity 
 alternatively if you want to run on homeserver in daemon mode
 
 ```sh
-docker compose up -d
+docker-compose up -d
 ```
 
 ### Build from source
