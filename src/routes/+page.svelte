@@ -20,7 +20,6 @@
     let intervalId: number | null = null;
     let totalTime = 0;
     let date: Date | null = null;
-    let newTag = "";
     let selectedTag = "Work";
     let tags: Array<any> = [];
 
@@ -50,7 +49,7 @@
         fetchData(Analysis.Daily);
     });
 
-    function drawData(){
+    function drawDonut(){
 
         const percentageMap = calculatePercentage();
         
@@ -120,7 +119,7 @@
         sessions = Object.entries(res).length;
         renderDates(analysis);
         setTotalTime();
-        drawData();
+        drawDonut();
     }
 
     function renderDates(analysis: Analysis){
@@ -275,11 +274,18 @@
         </div> 
         <div class="flex justify-center flex-1 px-2">
             <div class="join">
+                <button class="join-item btn btn-ghost rounded-btn">
+                    &larr;
+                </button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Daily); wannaSee = true;}}>Day</button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Weekly); wannaSee = true;}}>Week</button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Monthly); wannaSee = true;}}>Month</button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Yearly); wannaSee = true;}}>Year</button>
+                <button class="join-item btn btn-ghost rounded-btn">
+                    &rarr;
+                </button>
             </div>
+            
           
         </div>
         <div class="flex justify-end">
