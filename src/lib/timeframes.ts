@@ -1,5 +1,5 @@
-export function getRollingSevenDayPeriod(){
-    const today = new Date();
+export function getRollingSevenDayPeriod(currentDay: string){
+    const today = new Date(currentDay);
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 6);
 
@@ -9,10 +9,10 @@ export function getRollingSevenDayPeriod(){
     };
 }
 
-export function getFirstAndLastDateOfCurrentMonth(): { firstDate: string; lastDate: string } {
+export function getFirstAndLastDateOfCurrentMonth(month: string): { firstDate: string; lastDate: string } {
     
     // get first day of month
-    const today = new Date();
+    const today = new Date(month);
     const firstDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
     
     // get last day of month
@@ -21,12 +21,12 @@ export function getFirstAndLastDateOfCurrentMonth(): { firstDate: string; lastDa
 
 }
 
-export function getFirstAndLastDateOfYear(): { firstDate: string; lastDate: string } {
-    const firstDate = new Date();
+export function getFirstAndLastDateOfYear(year: string): { firstDate: string; lastDate: string } {
+    const firstDate = new Date(year);
     firstDate.setMonth(0); // January
-    firstDate.setDate(1); // First day of the year
+    firstDate.setDate(0); // First day of the year
 
-    const lastDate = new Date();
+    const lastDate = new Date(year);
     lastDate.setFullYear(lastDate.getFullYear()); // Current year
     lastDate.setMonth(11); // December
     lastDate.setDate(31); // Last day of the year

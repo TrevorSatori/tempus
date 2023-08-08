@@ -18,7 +18,7 @@ export function createDB(){
         addTag("Work");
         addTag("Study");
     } else {
-        db = new Database(DB_PATH);
+        db = new Database(DB_PATH, { verbose: console.log });
     }
 }
 
@@ -30,19 +30,19 @@ export function addRecord(session: Date, tag_id: string, time_focused: number){
 }
 
 
-export function getDaily(){
+export function getDaily(day: string){
 
-    const startOfDay = new Date().toISOString().split('T')[0]
+    // const day = new Date().toISOString().split('T')[0]
     const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) = ?");
-    let entries = stmt.all(startOfDay);
+    let entries = stmt.all(day);
 
     return entries;
 }
   
   
-export function getWeekly(){
+export function getWeekly(currentDay: string){
 
-    const {sevenDaysAgo, today} = getRollingSevenDayPeriod();
+    const {sevenDaysAgo, today} = getRollingSevenDayPeriod(currentDay);
     const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) <= ?");
     let entries = stmt.all(sevenDaysAgo, today);
 
@@ -50,9 +50,10 @@ export function getWeekly(){
 }
 
   
-export function getMonthly(){
+export function getMonthly(month: string){
 
-    const { firstDate, lastDate } = getFirstAndLastDateOfCurrentMonth();
+
+    const { firstDate, lastDate } = getFirstAndLastDateOfCurrentMonth(month);
     const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) < ?");
     let entries = stmt.all(firstDate, lastDate);
     return entries;
@@ -60,10 +61,10 @@ export function getMonthly(){
 
 
 
-export function getYearly(){
+export function getYearly(year: string){
 
-    const {firstDate, lastDate} = getFirstAndLastDateOfYear();
-    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) <= ?");
+    const {firstDate, lastDate} = getFirstAndLastDateOfYear(year);
+    const stmt = db.prepare("SELECT session, time_focused, tag_id FROM focus WHERE date(session) >= ? AND date(session) < ?");
     let entries = stmt.all(firstDate, lastDate);
 
     return entries;
