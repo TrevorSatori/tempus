@@ -336,19 +336,11 @@
         </div> 
         <div class="flex justify-center flex-1 px-2">
             <div class="join">
-                <button class="join-item btn btn-ghost rounded-btn" on:click={decreaseDate}>
-                    &larr;
-                </button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Daily); wannaSee = true;}}>Day</button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Weekly); wannaSee = true;}}>Week</button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Monthly); wannaSee = true;}}>Month</button>
                 <button class="join-item btn btn-ghost rounded-btn" on:click={() => {fetchData(Analysis.Yearly); wannaSee = true;}}>Year</button>
-                <button class="join-item btn btn-ghost rounded-btn" on:click={increaseDate}>
-                    &rarr;
-                </button>
             </div>
-            
-          
         </div>
         <div class="flex justify-end">
             <!-- svelte-ignore a11y-missing-attribute -->
@@ -417,20 +409,27 @@
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <div class="bg-gray-200 bg-opacity-0 p-4"></div>
             <!-- Timeline -->
-            
-            <div> 
+            <div class="grid grid-cols-3">
+               <button class="join-item btn btn-ghost rounded-btn" on:click={decreaseDate}>
+                    &larr;
+                </button>
                 {#if selectedAnalysis === Analysis.Daily}
-                    <h2 class="text-primary text-lg font-mono">{selectedDate.toISOString().split('T')[0]}</h2>
+                    <div class="col-span-1"><p class="text-primary text-lg font-mono">{selectedDate.toISOString().split('T')[0]}</p></div>
                 {:else if selectedAnalysis === Analysis.Weekly}
                     <h2 class="text-primary text-lg font-mono">{startTimeFrame} - {endTimeFrame}</h2>
                 {:else if selectedAnalysis === Analysis.Monthly}
                     <h2 class="text-primary text-lg font-mono">{selectedDate.toLocaleDateString('en-US', {month: 'short', year: 'numeric'})}</h2>
                 {:else if selectedAnalysis === Analysis.Yearly}
-                    <h2 class="text-primary text-lg font-mono">{selectedDate.toLocaleDateString('en-US', {year: 'numeric'})}</h2>
+                    <h2 class="text-primary text-lg font-mono">{selectedDate.toLocaleDateString('en-US', {year: 'numeric'})}</h2> 
                 {/if}
-                <TagDistribution tagData={tagData} />
+                <button class="join-item btn btn-ghost rounded-btn" on:click={increaseDate}>
+                    &rarr;
+                </button>
+                
             </div>
+            <TagDistribution tagData={tagData} />
         </div>
+        
 
         <!-- Data visualizations -->
         <div class="grid grid-cols-1">

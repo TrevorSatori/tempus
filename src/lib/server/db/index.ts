@@ -18,7 +18,7 @@ export function createDB(){
         addTag("Work");
         addTag("Study");
     } else {
-        db = new Database(DB_PATH, { verbose: console.log });
+        db = new Database(DB_PATH);
     }
 }
 
