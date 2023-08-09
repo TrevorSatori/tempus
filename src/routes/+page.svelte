@@ -51,12 +51,15 @@
 
     let minutesInCountdown = 5;
     let secondsInCountdown: number;
+    
+
+    let sliderVal: number;
 
 
 
 
     $: {
-        totalTime = minutesInCountdown * 60;
+        totalTime = sliderVal * 60;
         // seconds = totalTime % 60;
         // hours = Math.floor(totalTime / 3600);
         // minutes = Math.floor((totalTime - hours*3600) / 60);
@@ -395,22 +398,6 @@
 	}
 
 
-    // let minutesInCountdown = 60;
-    let prevSliderValue = 60; // Initialize with the initial value
-
-  function handleSliderInput(event: { target: { value: string | number; }; }) {
-    const currentValue = +event.target.value; // Convert to a number
-
-    // Check if the current value is greater than the previous value
-    if (currentValue > prevSliderValue) {
-      minutesInCountdown++;
-    } else if (currentValue < prevSliderValue) {
-      minutesInCountdown--;
-    }
-
-    prevSliderValue = currentValue; // Update the previous value
-    organizeTime(); // Call your function here to handle the update
-  }
 
 </script>
 
@@ -493,9 +480,10 @@
 
             <input type="checkbox" class="toggle" bind:checked={isTimer} />
             {#if isTimer}
-                <input type="range" min="5" max="8"  on:input={() => {organizeTime(); handleSliderInput; console.log(minutesInCountdown)}} bind:value={minutesInCountdown} class="range range-success" />
-            {/if}
+                <!-- <input type="range" min="5" max="8"  on:input={() => {organizeTime(); handleSliderInput; console.log(minutesInCountdown)}} bind:value={minutesInCountdown} class="range range-success" /> -->
+                <input type="range" min="5" max="120"bind:value={sliderVal} on:input={() => {console.log(totalTime); organizeTime()}} class="range range-success" />
 
+            {/if} 
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
             {:else}
