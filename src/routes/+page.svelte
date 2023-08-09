@@ -46,6 +46,9 @@
     let wannaSee = false;
     let sliderVal: number;
 
+    let timeIsOut = false; 
+    let timerGoalTime = 0;
+    // we want this to trigger page pop up when the timer is finished
 
     $: {
         totalTime = sliderVal * 60;
@@ -180,7 +183,6 @@
             date: selectedDate.toISOString().split('T')[0]
         })
 
-        console.log(selectedDate);
         // date.setDate(date.getDate() - 1);
 
 
@@ -287,6 +289,8 @@
         totalSeconds = totalSeconds % 60;
         seconds = totalSeconds;
 
+
+        
     }
     
 
@@ -295,6 +299,8 @@
 
         if (!isTimer){
             totalTime = 0;
+        } else {
+            timerGoalTime = totalTime;
         }
         
         isFocused = true
@@ -304,17 +310,17 @@
             () => {
             // Callback function: This is what gets executed repeatedly
             if (isTimer){
-                totalTime--;
+                if (totalTime === 0) {
+                    clearInterval(intervalId);
+                    postData();
+                }
+                else{
+                    totalTime--;
+                }
             }else{
                 totalTime++;
             }
-            console.log(totalTime);
             organizeTime();
-
-            if (totalTime === 0) {
-                clearInterval(intervalId);
-            }
-
             }, 1000);     
         // --- TODO Create Wowoweewah noise --- |||
     }
@@ -344,14 +350,27 @@
 
 
 	async function postData () {
-		const res = await fetch('/api/update', {
-			method: 'POST',
-			body: JSON.stringify({
-				date,
-                selectedTag,
-				totalTime,
-			})
-		})
+
+        if (isTimer){
+            const res = await fetch('/api/update', {
+                method: 'POST',
+                body: JSON.stringify({
+                    date,
+                    selectedTag,
+                    timerGoalTime,
+                })
+		    })
+        } else {
+            const res = await fetch('/api/update', {
+                method: 'POST',
+                body: JSON.stringify({
+                    date,
+                    selectedTag,
+                    totalTime,
+                })
+		    })
+        }
+		
 	}
 
 
