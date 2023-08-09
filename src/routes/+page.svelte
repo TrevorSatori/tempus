@@ -44,25 +44,11 @@
     let tagData: any = [];
 
     let wannaSee = false;
-
-
-    // The variables needed to keep track of 
-    // seconds that are decremented in the timer
-
-    let minutesInCountdown = 5;
-    let secondsInCountdown: number;
-    
-
     let sliderVal: number;
-
-
 
 
     $: {
         totalTime = sliderVal * 60;
-        // seconds = totalTime % 60;
-        // hours = Math.floor(totalTime / 3600);
-        // minutes = Math.floor((totalTime - hours*3600) / 60);
     }
 
 
@@ -301,20 +287,6 @@
         totalSeconds = totalSeconds % 60;
         seconds = totalSeconds;
 
-
-        // extra second is compensated for by setting seconds to 1
-        // allows animation to render correctly
-        // if (seconds === 60) {
-        //     seconds = 0;
-        //     minutes += 1;
-        // }
-
-        // // if focused for an hour, reset minutes, reset hours 
-        // if (minutes === 60){
-        //     hours += 1;
-        //     minutes = 0;
-        //     seconds = 0;
-        // }
     }
     
 
@@ -339,16 +311,11 @@
             console.log(totalTime);
             organizeTime();
 
-
-
-            if (totalTime < 0) {
-            console.log("timerIsFinished");
-            clearInterval(intervalId);
+            if (totalTime === 0) {
+                clearInterval(intervalId);
             }
+
             }, 1000);     
-        // seconds += 1;
-        // totalTime += 1;
-        // organizeTime();
         // --- TODO Create Wowoweewah noise --- |||
     }
 
@@ -361,27 +328,17 @@
         minutes = 0;
         hours = 0;
 
-        // if session less than a minute, don't add to records
-        if (totalTime >= (60 * 5)){
-            // post
-            postData();
+        if (!isTimer){
+            // if session less than a minute, don't add to records
+            if (totalTime >= (60 * 5)){
+                // post
+                postData();
+            }
+            
         }
        
+       
     }
-
-    function countDown(){
-        const countDownId = window.setInterval(
-            () => {
-            // Callback function: This is what gets executed repeatedly
-            totalTime--;
-
-            if (totalTime < 0) {
-            console.log("timerIsFinished");
-            clearInterval(countDownId);
-            }
-            }, 1000);
-    }
-
 
 
 
@@ -478,11 +435,14 @@
                 {/if}
             </div>
 
-            <input type="checkbox" class="toggle" bind:checked={isTimer} />
+            <div class="grid grid-cols-3">
+                <div>Stopwatch</div>
+                <div><input type="checkbox" class="toggle" bind:checked={isTimer} /></div>
+                <div>Timer</div>
+            </div>
+            
             {#if isTimer}
-                <!-- <input type="range" min="5" max="8"  on:input={() => {organizeTime(); handleSliderInput; console.log(minutesInCountdown)}} bind:value={minutesInCountdown} class="range range-success" /> -->
                 <input type="range" min="5" max="120"bind:value={sliderVal} on:input={() => {console.log(totalTime); organizeTime()}} class="range range-success" />
-
             {/if} 
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
