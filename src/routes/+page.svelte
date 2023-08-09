@@ -55,6 +55,9 @@
 
     let sliderVal: number;
 
+    let timeIsOut = false; 
+    // we want this to trigger page pop up when the timer is finished
+
 
 
 
@@ -302,19 +305,7 @@
         seconds = totalSeconds;
 
 
-        // extra second is compensated for by setting seconds to 1
-        // allows animation to render correctly
-        // if (seconds === 60) {
-        //     seconds = 0;
-        //     minutes += 1;
-        // }
-
-        // // if focused for an hour, reset minutes, reset hours 
-        // if (minutes === 60){
-        //     hours += 1;
-        //     minutes = 0;
-        //     seconds = 0;
-        // }
+        
     }
     
 
@@ -332,19 +323,24 @@
             () => {
             // Callback function: This is what gets executed repeatedly
             if (isTimer){
-                totalTime--;
+                if (totalTime === 0){
+                    // we want to trigger an event here
+
+                }
+                else{
+                    totalTime--;
+                }
             }else{
                 totalTime++;
             }
             console.log(totalTime);
-            organizeTime();
 
-
-
-            if (totalTime < 0) {
+            if (totalTime === 0) {
             console.log("timerIsFinished");
             clearInterval(intervalId);
+            postData();
             }
+            organizeTime();
             }, 1000);     
         // seconds += 1;
         // totalTime += 1;
