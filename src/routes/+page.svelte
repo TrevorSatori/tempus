@@ -46,7 +46,7 @@
     let tagData: any = [];
 
     let wannaSee = false;
-    let sliderVal: number;
+    let sliderVal: number = 5;
 
     let timeIsOut = false; 
     let timerGoalTime = 0;
@@ -78,7 +78,6 @@
         themeChange(false);
         getTags();
         fetchData(Analysis.Daily);
-        // countDown();
     });
 
     //update date, get new data
@@ -301,11 +300,17 @@
         minutes = Math.floor(totalSeconds / 60);
         totalSeconds = totalSeconds % 60;
         seconds = totalSeconds;
-
-
         
     }
     
+    function toggleInitialTime(){
+        if (!isTimer){
+           totalTime = 300;
+           sliderVal = 5;
+        } else{
+            totalTime = 0;
+        }
+    }
 
     // start focus, increase time, get time snapshot.
     function startFocus(){
@@ -334,6 +339,7 @@
             }else{
                 totalTime++;
             }
+            console.log(totalTime);
             organizeTime();
             }, 1000);     
         // --- TODO Create Wowoweewah noise --- |||
@@ -361,8 +367,6 @@
     }
 
 
-
-
 	async function postData () {
 
         if (isTimer){
@@ -385,6 +389,12 @@
 		    })
         }
 	}
+
+    let showAlert = true;
+
+    function closeAlert() {
+        showAlert = false;
+    }
 
 
 
@@ -428,14 +438,12 @@
             </div>
         </div>
     </div>
-    {#if isTimer && totalTime === 0}
+    {#if isTimer && totalTime === 0 && showAlert}
     <div class="alert alert-success">
         <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <span>Your session has been completed!</span>
+        <span on:click={closeAlert}>Your session has been completed!</span>
       </div>
-    {/if}
-    <!-- <input type="checkbox" class="toggle" checked /> -->
-    
+    {/if}    
     <!-- Render addTag if button pressed -->
     {#if ($addTagStore === true)}
         <CreateTag getTags={getTags} />
@@ -456,11 +464,19 @@
         <div class="grid grid-rows-2">
             <div class="badge badge-secondary badge-outline mx-auto p-4">{selectedTag}</div>
             <div>
-                <span class="countdown font-mono text-2xl mt-4 mb-2"> <!-- Adjusted margins here too -->
-                    <span style="--value:{hours};"></span>:
-                    <span style="--value:{minutes};"></span>:
-                    <span style="--value:{seconds};"></span>
-                </span>
+                {#if isTimer}
+                    <span class="countdown font-mono text-2xl mt-4 mb-2"> <!-- Adjusted margins here too -->
+                        <span style="--value:{Math.floor(totalTime / 3600)};"></span>:
+                        <span style="--value:{Math.floor(totalTime /60) - (Math.floor(totalTime / 3600) * 60)};"></span>:
+                        <span style="--value:{seconds};"></span>
+                    </span>
+                {:else}
+                    <span class="countdown font-mono text-2xl mt-4 mb-2"> <!-- Adjusted margins here too -->
+                        <span style="--value:{Math.floor(totalTime / 3600)};"></span>:
+                        <span style="--value:{Math.floor(totalTime /60) - (Math.floor(totalTime / 3600) * 60)};"></span>:
+                        <span style="--value:{seconds};"></span>
+                    </span>
+                {/if}
                 {#if totalTime < (60 * 5) && isFocused}
                     <h3 class="mt-2">(Sessions less than five minutes won't be recorded)</h3> <!-- Adjusted margin top -->
                 {/if}
@@ -469,7 +485,7 @@
             {#if !isFocused}
                 <div class="grid grid-cols-3">
                     <div class={isTimer ? 'text-tertiary' : 'text-primary'}>Stopwatch</div>
-                    <div><input type="checkbox" class="toggle" bind:checked={isTimer} /></div>
+                    <div><input type="checkbox" class="toggle"  on:change={toggleInitialTime} bind:checked={isTimer} /></div>
                     <div class={isTimer ? 'text-primary' : 'text-tertiary'}>Timer</div>
                 </div>
 
