@@ -455,7 +455,7 @@
                 </div>
 
                 {#if isTimer}
-                    <input type="range" min="5" max="120"bind:value={sliderVal} on:input={() => {console.log(totalTime); organizeTime()}} class="range range-success" />
+                    <input type="range" min="5" max="120" bind:value={sliderVal} on:input={organizeTime} class="range range-secondary" />
                 {/if}
             {/if}
             
