@@ -8,6 +8,7 @@
     import { themeChange } from 'theme-change';
     import { addTagStore } from "$lib/stores/store";
     import CreateTag from "$lib/components/CreateTag.svelte";
+    // import AudioPlayer from './AudioPlayer.svelte';
 
     enum Analysis {
         Daily,
@@ -58,6 +59,10 @@
 
     // used to toggle between timer and stopwatch
     let isTimer = true;
+    
+    let visibleTimerNotification = false;
+
+    // let audio = new Audio("static/final-fantasy.mp3");
 
 
     // d3 data
@@ -373,6 +378,7 @@
 <body class="min-h-screen">
 
     <!-- Navbar -->
+    
     <div class="navbar bg-base-300 rounded-box">
         <div class="flex-1 px-2 lg:flex-none">
           <!-- svelte-ignore a11y-missing-attribute -->
@@ -414,7 +420,12 @@
             </div>
         </div>
     </div>
-
+    {#if isTimer && totalTime === 0}
+    <div class="alert alert-success">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>Your session has been completed!</span>
+      </div>
+    {/if}
     <!-- <input type="checkbox" class="toggle" checked /> -->
     
     <!-- Render addTag if button pressed -->
@@ -461,8 +472,10 @@
             
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
-            {:else}
+            {:else if (isFocused && totalTime !== 0) || (isFocused && !isTimer)}
                 <button class="btn btn-error btn-lg mt-4 mb-2 " on:click={() => {stopFocus(); wannaSee = false;}}>Stop</button> <!-- Decreased the bottom margin -->
+            {:else if isFocused && totalTime === 0 && isTimer}
+                <button class="btn btn-success btn-lg mt-4 mb-2" on:click={() => {stopFocus(); wannaSee = false;}}>Reset</button> <!-- Decreased the bottom margin -->
             {/if}
         </div>
     </div>
