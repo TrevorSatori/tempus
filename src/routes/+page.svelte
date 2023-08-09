@@ -20,7 +20,7 @@
 
     
     let isFocused = false;
-    let intervalId: number | null = null;
+    let intervalId: number; //| null = null;
     let totalTime = 0;
     let date: Date | null = null;
     let selectedTag = "Work";
@@ -45,11 +45,35 @@
 
     let wannaSee = false;
 
+
+    // The variables needed to keep track of 
+    // seconds that are decremented in the timer
+
+    let minutesInCountdown = 5;
+    let secondsInCountdown: number;
+
+
+
+
+    $: {
+        totalTime = minutesInCountdown * 60;
+        // seconds = totalTime % 60;
+        // hours = Math.floor(totalTime / 3600);
+        // minutes = Math.floor((totalTime - hours*3600) / 60);
+    }
+
+
+
+    // used to toggle between timer and stopwatch
+    let isTimer = true;
+
+
     // d3 data
     onMount(() => {
         themeChange(false);
         getTags();
         fetchData(Analysis.Daily);
+        // countDown();
     });
 
     //update date, get new data
@@ -267,32 +291,61 @@
     }
 
     function organizeTime(){
+        let totalSeconds = totalTime;
+        hours = Math.floor(totalTime / 3600);
+        totalSeconds = totalSeconds % 3600;
+        minutes = Math.floor(totalSeconds / 60);
+        totalSeconds = totalSeconds % 60;
+        seconds = totalSeconds;
 
-        seconds += 1;
-        totalTime += 1;
+
         // extra second is compensated for by setting seconds to 1
         // allows animation to render correctly
-        if (seconds === 61) {
-            seconds = 1;
-            minutes += 1;
-        }
+        // if (seconds === 60) {
+        //     seconds = 0;
+        //     minutes += 1;
+        // }
 
-        // if focused for an hour, reset minutes, reset hours 
-        if (minutes === 60){
-            hours += 1;
-            minutes = 0;
-            seconds = 0;
-        }
+        // // if focused for an hour, reset minutes, reset hours 
+        // if (minutes === 60){
+        //     hours += 1;
+        //     minutes = 0;
+        //     seconds = 0;
+        // }
     }
+    
 
     // start focus, increase time, get time snapshot.
     function startFocus(){
+
+        if (!isTimer){
+            totalTime = 0;
+        }
         
         isFocused = true
         date = new Date();
-        totalTime = 0;
-        intervalId = window.setInterval(organizeTime, 1000);
-        organizeTime();
+        // let intervalId: number;
+        intervalId = window.setInterval(
+            () => {
+            // Callback function: This is what gets executed repeatedly
+            if (isTimer){
+                totalTime--;
+            }else{
+                totalTime++;
+            }
+            console.log(totalTime);
+            organizeTime();
+
+
+
+            if (totalTime < 0) {
+            console.log("timerIsFinished");
+            clearInterval(intervalId);
+            }
+            }, 1000);     
+        // seconds += 1;
+        // totalTime += 1;
+        // organizeTime();
         // --- TODO Create Wowoweewah noise --- |||
     }
 
@@ -313,6 +366,23 @@
        
     }
 
+    function countDown(){
+        const countDownId = window.setInterval(
+            () => {
+            // Callback function: This is what gets executed repeatedly
+            totalTime--;
+
+            if (totalTime < 0) {
+            console.log("timerIsFinished");
+            clearInterval(countDownId);
+            }
+            }, 1000);
+    }
+
+
+
+
+
 	async function postData () {
 		const res = await fetch('/api/update', {
 			method: 'POST',
@@ -323,6 +393,24 @@
 			})
 		})
 	}
+
+
+    // let minutesInCountdown = 60;
+    let prevSliderValue = 60; // Initialize with the initial value
+
+  function handleSliderInput(event: { target: { value: string | number; }; }) {
+    const currentValue = +event.target.value; // Convert to a number
+
+    // Check if the current value is greater than the previous value
+    if (currentValue > prevSliderValue) {
+      minutesInCountdown++;
+    } else if (currentValue < prevSliderValue) {
+      minutesInCountdown--;
+    }
+
+    prevSliderValue = currentValue; // Update the previous value
+    organizeTime(); // Call your function here to handle the update
+  }
 
 </script>
 
@@ -402,6 +490,12 @@
                     <h3 class="mt-2">(Sessions less than five minutes won't be recorded)</h3> <!-- Adjusted margin top -->
                 {/if}
             </div>
+
+            <input type="checkbox" class="toggle" bind:checked={isTimer} />
+            {#if isTimer}
+                <input type="range" min="5" max="8"  on:input={() => {organizeTime(); handleSliderInput; console.log(minutesInCountdown)}} bind:value={minutesInCountdown} class="range range-success" />
+            {/if}
+
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
             {:else}
