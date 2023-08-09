@@ -8,6 +8,8 @@
     import { themeChange } from 'theme-change';
     import { addTagStore } from "$lib/stores/store";
     import CreateTag from "$lib/components/CreateTag.svelte";
+    import { browser } from "$app/environment";
+
 
     enum Analysis {
         Daily,
@@ -20,7 +22,7 @@
 
     
     let isFocused = false;
-    let intervalId: number | null = null;
+    let intervalId: number;
     let totalTime = 0;
     let date: Date | null = null;
     let selectedTag = "Work";
@@ -44,12 +46,39 @@
     let tagData: any = [];
 
     let wannaSee = false;
+    let sliderVal: number;
+
+    let timeIsOut = false; 
+    let timerGoalTime = 0;
+    // we want this to trigger page pop up when the timer is finished
+
+    $: {
+        totalTime = sliderVal * 60;
+    }
+
+
+
+    // used to toggle between timer and stopwatch
+    let isTimer = true;
+    
+    let visibleTimerNotification = false;
+    
+    // let audio = new Audio('static/on_time.mp3');
+    // Create an Audio object with the path to your audio file
+	let audio: any;
+    if (browser){
+        audio = new Audio('/on_time.mp3');
+    }
+    function playAudio() {
+		audio.play();
+	}
 
     // d3 data
     onMount(() => {
         themeChange(false);
         getTags();
         fetchData(Analysis.Daily);
+        // countDown();
     });
 
     //update date, get new data
@@ -167,7 +196,6 @@
             date: selectedDate.toISOString().split('T')[0]
         })
 
-        console.log(selectedDate);
         // date.setDate(date.getDate() - 1);
 
 
@@ -267,32 +295,47 @@
     }
 
     function organizeTime(){
+        let totalSeconds = totalTime;
+        hours = Math.floor(totalTime / 3600);
+        totalSeconds = totalSeconds % 3600;
+        minutes = Math.floor(totalSeconds / 60);
+        totalSeconds = totalSeconds % 60;
+        seconds = totalSeconds;
 
-        seconds += 1;
-        totalTime += 1;
-        // extra second is compensated for by setting seconds to 1
-        // allows animation to render correctly
-        if (seconds === 61) {
-            seconds = 1;
-            minutes += 1;
-        }
 
-        // if focused for an hour, reset minutes, reset hours 
-        if (minutes === 60){
-            hours += 1;
-            minutes = 0;
-            seconds = 0;
-        }
+        
     }
+    
 
     // start focus, increase time, get time snapshot.
     function startFocus(){
+
+        if (!isTimer){
+            totalTime = 0;
+        } else {
+            timerGoalTime = totalTime;
+        }
         
         isFocused = true
         date = new Date();
-        totalTime = 0;
-        intervalId = window.setInterval(organizeTime, 1000);
-        organizeTime();
+        // let intervalId: number;
+        intervalId = window.setInterval(
+            () => {
+            // Callback function: This is what gets executed repeatedly
+            if (isTimer){
+                if (totalTime === 0) {
+                    clearInterval(intervalId);
+                    playAudio();
+                    postData();
+                }
+                else{
+                    totalTime--;
+                }
+            }else{
+                totalTime++;
+            }
+            organizeTime();
+            }, 1000);     
         // --- TODO Create Wowoweewah noise --- |||
     }
 
@@ -305,30 +348,53 @@
         minutes = 0;
         hours = 0;
 
-        // if session less than a minute, don't add to records
-        if (totalTime >= (60 * 5)){
-            // post
-            postData();
+        if (!isTimer){
+            // if session less than a minute, don't add to records
+            if (totalTime >= (60 * 5)){
+                // post
+                postData();
+            }
+            
         }
+       
        
     }
 
+
+
+
 	async function postData () {
-		const res = await fetch('/api/update', {
-			method: 'POST',
-			body: JSON.stringify({
-				date,
-                selectedTag,
-				totalTime,
-			})
-		})
+
+        if (isTimer){
+            const res = await fetch('/api/update', {
+                method: 'POST',
+                body: JSON.stringify({
+                    date,
+                    selectedTag,
+                    totalTime: timerGoalTime,
+                })
+		    })
+        } else {
+            const res = await fetch('/api/update', {
+                method: 'POST',
+                body: JSON.stringify({
+                    date,
+                    selectedTag,
+                    totalTime,
+                })
+		    })
+        }
 	}
+
+
 
 </script>
 
 <body class="min-h-screen">
+    <!-- <audio id="audio-player" src="/on_time.mp3" controls></audio> -->
 
     <!-- Navbar -->
+    
     <div class="navbar bg-base-300 rounded-box">
         <div class="flex-1 px-2 lg:flex-none">
           <!-- svelte-ignore a11y-missing-attribute -->
@@ -362,7 +428,12 @@
             </div>
         </div>
     </div>
-
+    {#if isTimer && totalTime === 0}
+    <div class="alert alert-success">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>Your session has been completed!</span>
+      </div>
+    {/if}
     <!-- <input type="checkbox" class="toggle" checked /> -->
     
     <!-- Render addTag if button pressed -->
@@ -394,10 +465,25 @@
                     <h3 class="mt-2">(Sessions less than five minutes won't be recorded)</h3> <!-- Adjusted margin top -->
                 {/if}
             </div>
+
+            {#if !isFocused}
+                <div class="grid grid-cols-3">
+                    <div class={isTimer ? 'text-tertiary' : 'text-primary'}>Stopwatch</div>
+                    <div><input type="checkbox" class="toggle" bind:checked={isTimer} /></div>
+                    <div class={isTimer ? 'text-primary' : 'text-tertiary'}>Timer</div>
+                </div>
+
+                {#if isTimer}
+                    <input type="range" min="5" max="120" bind:value={sliderVal} on:input={organizeTime} class="range range-secondary" />
+                {/if}
+            {/if}
+            
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
-            {:else}
+            {:else if (isFocused && totalTime !== 0) || (isFocused && !isTimer)}
                 <button class="btn btn-error btn-lg mt-4 mb-2 " on:click={() => {stopFocus(); wannaSee = false;}}>Stop</button> <!-- Decreased the bottom margin -->
+            {:else if isFocused && totalTime === 0 && isTimer}
+                <button class="btn btn-success btn-lg mt-4 mb-2" on:click={() => {stopFocus(); wannaSee = false;}}>Reset</button> <!-- Decreased the bottom margin -->
             {/if}
         </div>
     </div>
