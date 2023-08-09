@@ -8,7 +8,8 @@
     import { themeChange } from 'theme-change';
     import { addTagStore } from "$lib/stores/store";
     import CreateTag from "$lib/components/CreateTag.svelte";
-    // import AudioPlayer from './AudioPlayer.svelte';
+    import { browser } from "$app/environment";
+
 
     enum Analysis {
         Daily,
@@ -21,7 +22,7 @@
 
     
     let isFocused = false;
-    let intervalId: number; //| null = null;
+    let intervalId: number;
     let totalTime = 0;
     let date: Date | null = null;
     let selectedTag = "Work";
@@ -61,9 +62,16 @@
     let isTimer = true;
     
     let visibleTimerNotification = false;
-
-    // let audio = new Audio("static/final-fantasy.mp3");
-
+    
+    // let audio = new Audio('static/on_time.mp3');
+    // Create an Audio object with the path to your audio file
+	let audio: any;
+    if (browser){
+        audio = new Audio('/on_time.mp3');
+    }
+    function playAudio() {
+		audio.play();
+	}
 
     // d3 data
     onMount(() => {
@@ -317,6 +325,7 @@
             if (isTimer){
                 if (totalTime === 0) {
                     clearInterval(intervalId);
+                    playAudio();
                     postData();
                 }
                 else{
@@ -357,18 +366,24 @@
 	async function postData () {
 
         if (isTimer){
-           totalTime = timerGoalTime;
-        } 
-
-        const res = await fetch('/api/update', {
+            const res = await fetch('/api/update', {
+                method: 'POST',
+                body: JSON.stringify({
+                    date,
+                    selectedTag,
+                    totalTime: timerGoalTime,
+                })
+		    })
+        } else {
+            const res = await fetch('/api/update', {
                 method: 'POST',
                 body: JSON.stringify({
                     date,
                     selectedTag,
                     totalTime,
                 })
-		})
-		
+		    })
+        }
 	}
 
 
@@ -376,6 +391,7 @@
 </script>
 
 <body class="min-h-screen">
+    <!-- <audio id="audio-player" src="/on_time.mp3" controls></audio> -->
 
     <!-- Navbar -->
     
