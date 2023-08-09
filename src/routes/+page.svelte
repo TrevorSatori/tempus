@@ -352,24 +352,17 @@
 	async function postData () {
 
         if (isTimer){
-            const res = await fetch('/api/update', {
-                method: 'POST',
-                body: JSON.stringify({
-                    date,
-                    selectedTag,
-                    timerGoalTime,
-                })
-		    })
-        } else {
-            const res = await fetch('/api/update', {
+           totalTime = timerGoalTime;
+        } 
+
+        const res = await fetch('/api/update', {
                 method: 'POST',
                 body: JSON.stringify({
                     date,
                     selectedTag,
                     totalTime,
                 })
-		    })
-        }
+		})
 		
 	}
 
@@ -454,15 +447,18 @@
                 {/if}
             </div>
 
-            <div class="grid grid-cols-3">
-                <div>Stopwatch</div>
-                <div><input type="checkbox" class="toggle" bind:checked={isTimer} /></div>
-                <div>Timer</div>
-            </div>
+            {#if !isFocused}
+                <div class="grid grid-cols-3">
+                    <div class={isTimer ? 'text-tertiary' : 'text-primary'}>Stopwatch</div>
+                    <div><input type="checkbox" class="toggle" bind:checked={isTimer} /></div>
+                    <div class={isTimer ? 'text-primary' : 'text-tertiary'}>Timer</div>
+                </div>
+
+                {#if isTimer}
+                    <input type="range" min="5" max="120"bind:value={sliderVal} on:input={() => {console.log(totalTime); organizeTime()}} class="range range-success" />
+                {/if}
+            {/if}
             
-            {#if isTimer}
-                <input type="range" min="5" max="120"bind:value={sliderVal} on:input={() => {console.log(totalTime); organizeTime()}} class="range range-success" />
-            {/if} 
             {#if !isFocused}
                 <button class="btn btn-success btn-lg mt-4 mb-2" on:click={startFocus}>Focus</button> <!-- Decreased the bottom margin -->
             {:else}
