@@ -1,3 +1,5 @@
+*Note: This branch is for a pokedex feature that will allow evolutions of pokemon in exchange for time spent in focus. Still in development
+
 # 🚀 Boost Your Productivity with our Self-Hosted Study Tracker! 📚
 
 Are you tired of constantly juggling different productivity apps, only to find none of them truly cater to your study needs? Look no further – we're thrilled to introduce our powerful Self-Hosted Study Tracker, designed to revolutionize your study routine and help you excel like never before.
