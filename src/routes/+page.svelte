@@ -80,6 +80,15 @@
         fetchData(Analysis.Daily);
     });
 
+    // pokedex functionality
+
+    let enabledPokedex = false;
+
+
+
+
+    // pokedex functionality end
+
     //update date, get new data
     function increaseDate(){
        
@@ -366,6 +375,15 @@
        
     }
 
+    function pokedexToggle(){
+        if (enabledPokedex){
+            enabledPokedex = false;
+        }
+        else{
+            enabledPokedex = true;
+        }
+    }
+
 
 	async function postData () {
 
@@ -437,6 +455,27 @@
                 </ul>
             </div>
         </div>
+        <div class="flex justify-end">
+            <!-- svelte-ignore a11y-missing-attribute -->
+            <div class="dropdown dropdown-end">
+                <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                <!-- svelte-ignore a11y-label-has-associated-control -->
+                <label tabindex="0" style="font-size: 26px" class="btn btn-ghost rounded-btn m-1">&#9881</label>
+                <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
+                <!-- For each loop rendering all tags from database -->
+                {#if !enabledPokedex}
+                <li><a on:click={pokedexToggle}>Enable Pokédex</a></li>
+                {/if} 
+                {#if enabledPokedex}
+                <li><a on:click={pokedexToggle }>Turn off Pokédex</a></li>
+                {/if} 
+                </ul>
+            </div>
+            
+        </div>
+
+
     </div>
     {#if isTimer && totalTime === 0 && showAlert}
     <div class="alert alert-success">
@@ -452,7 +491,7 @@
 
     <!-- borat, button, timer, tag  -->
     <div class="container mx-auto">
-
+        {#if !enabledPokedex}
         <div class="grid place-items-center p-10">
             <img 
             src="borat.png" 
@@ -461,6 +500,17 @@
             alt="failed to load"
             />
         </div>
+        {/if}
+        {#if enabledPokedex}
+        <div class="grid place-items-center p-10">
+            <img 
+            src="charmander-gif-pokemon.gif" 
+            width="500" 
+            height="500" 
+            alt="failed to load"
+            />
+        </div>
+        {/if}
         <div class="grid grid-rows-2">
             <div class="badge badge-secondary badge-outline mx-auto p-4">{selectedTag}</div>
             <div>
